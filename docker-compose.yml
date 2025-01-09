@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   hubly:
     image: saimonribeiros/hubly:docker 
@@ -11,18 +9,34 @@ services:
       - ENVIRONMENT_ELASTICSEARCH_HOST=http://localhost:9200
       - ENVIRONMENT_REDIS_HOST=localhost:6379
       - ENVIRONMENT_REDIS_DATABASE=0
-      - ENVIRONMENT_AMPQ_HOST=amqp://guest:guest@rabbitmq:5672/
+      - ENVIRONMENT_AMPQ_HOST=amqp://guest:guest@rabbitmq:5672   
       - ENVIRONMENT_PGSQL_HOST=postgres://postgres:postgres@postgres:5432/hubly
     ports:
       - "8081:8081"      
     networks:
-      - elastic-network
+      - hubly-network
     depends_on:
       - elasticsearch
       - postgres
       - kibana
       - rabbitmq
+    restart: always
   
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5671:5672"
+      - "15671:15672"
+    networks:
+      - hubly-network
+    depends_on:
+      - elasticsearch
+      - kibana
+        
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
     container_name: elasticsearch
@@ -41,7 +55,7 @@ services:
       - "9200:9200"
       - "9300:9300"
     networks:
-      - elastic-network
+      - hubly-network
 
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.2
@@ -51,21 +65,11 @@ services:
     ports:
       - "5601:5601"
     networks:
-      - elastic-network
+      - hubly-network
     depends_on:
       - elasticsearch
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    ports:
-      - "5671:5672"
-      - "15671:15672"
-    networks:
-      - elastic-network
+ 
 
   postgres:
     image: postgres:15
@@ -79,11 +83,13 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - elastic-network
+      - hubly-network
+    depends_on:
+      - rabbitmq
 
 volumes:
   esdata:
   pgdata:
 
 networks:
-  elastic-network:
+  hubly-network:
