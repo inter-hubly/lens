@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  hubly:
+    image: saimonribeiros/hubly:docker 
+    container_name: hubly
+    environment:
+      - ENVIRONMENT=docker
+      - ENVIRONMENT_PORT=8081
+      - ENVIRONMENT_APPID=1121875729525113
+      - ENVIRONMENT_ELASTICSEARCH_HOST=http://localhost:9200
+      - ENVIRONMENT_REDIS_HOST=localhost:6379
+      - ENVIRONMENT_REDIS_DATABASE=0
+      - ENVIRONMENT_AMPQ_HOST=amqp://guest:guest@rabbitmq:5672/
+      - ENVIRONMENT_PGSQL_HOST=postgres://postgres:postgres@postgres:5432/hubly
+    ports:
+      - "8081:8081"      
+    networks:
+      - elastic-network
+    depends_on:
+      - elasticsearch
+      - postgres
+      - kibana
+      - rabbitmq
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - elastic-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.2
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - elastic-network
+    depends_on:
+      - elasticsearch
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5671:5672"
+      - "15671:15672"
+    networks:
+      - elastic-network
+
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=frajolinha202
+      - POSTGRES_DB=hubly
+    ports:
+      - "5431:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - elastic-network
+
+volumes:
+  esdata:
+  pgdata:
+
+networks:
+  elastic-network:

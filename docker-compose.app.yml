@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  hubly:
+    image: saimonribeiros/hubly:docker 
+    container_name: hubly
+    environment:
+      - ENVIRONMENT=docker
+    ports:
+      - "8081:8081"      
