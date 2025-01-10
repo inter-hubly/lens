@@ -1,18 +1,44 @@
+version: '3.8'
+
 services:
-  hubly:
-    image: saimonribeiros/hubly:docker 
-    container_name: hubly
+  keeper:
+    image: ghcr.io/inter-hubly/keeper:${ENVIRONMENT}
+    container_name: keeper
     environment:
-      - ENVIRONMENT=docker
       - ENVIRONMENT_PORT=8081
-      - ENVIRONMENT_APPID=1121875729525113
-      - ENVIRONMENT_ELASTICSEARCH_HOST=http://localhost:9200
-      - ENVIRONMENT_REDIS_HOST=localhost:6379
-      - ENVIRONMENT_REDIS_DATABASE=0
-      - ENVIRONMENT_AMPQ_HOST=amqp://guest:guest@rabbitmq:5672   
-      - ENVIRONMENT_PGSQL_HOST=postgres://postgres:postgres@postgres:5432/hubly
+      - ENVIRONMENT=${ENVIRONMENT}
+      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
+      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
+      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
+      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
+      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
+      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
     ports:
-      - "8081:8081"      
+      - "8081:8081"
+    networks:
+      - hubly-network
+    depends_on:
+      - linker
+      - elasticsearch
+      - postgres
+      - kibana
+      - rabbitmq
+    restart: always
+
+  linker:
+    image: ghcr.io/inter-hubly/linker:${ENVIRONMENT}
+    container_name: linker
+    environment:
+      - ENVIRONMENT_PORT=8085
+      - ENVIRONMENT=${ENVIRONMENT}
+      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
+      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
+      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
+      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
+      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
+      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
+    ports:
+      - "8085:8085"
     networks:
       - hubly-network
     depends_on:
@@ -21,7 +47,53 @@ services:
       - kibana
       - rabbitmq
     restart: always
-  
+
+  pulse:
+    image: ghcr.io/inter-hubly/pulse:${ENVIRONMENT}
+    container_name: pulse
+    environment:
+      - ENVIRONMENT_PORT=8082
+      - ENVIRONMENT=${ENVIRONMENT}
+      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
+      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
+      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
+      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
+      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
+      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
+    ports:
+      - "8082:8082"
+    networks:
+      - hubly-network
+    depends_on:
+      - elasticsearch
+      - postgres
+      - kibana
+      - rabbitmq
+    restart: always
+    
+  webhook:
+    image: ghcr.io/inter-hubly/webhook:${ENVIRONMENT}
+    container_name: webhook
+    environment:
+      - ENVIRONMENT_PORT=8080
+      - ENVIRONMENT=${ENVIRONMENT}
+      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
+      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
+      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
+      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
+      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
+      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
+    ports:
+      - "8080:8080"
+    networks:
+      - hubly-network
+    depends_on:
+      - elasticsearch
+      - postgres
+      - kibana
+      - rabbitmq
+    restart: always
+      
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -36,7 +108,7 @@ services:
     depends_on:
       - elasticsearch
       - kibana
-        
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
     container_name: elasticsearch
@@ -69,15 +141,14 @@ services:
     depends_on:
       - elasticsearch
 
- 
-
   postgres:
     image: postgres:15
     container_name: postgres
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=frajolinha202
+      - POSTGRES_PASSWORD=mypass
       - POSTGRES_DB=hubly
+
     ports:
       - "5431:5432"
     volumes:
