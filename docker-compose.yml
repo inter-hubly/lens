@@ -16,6 +16,7 @@ services:
       - ENVIRONMENT_HASH_ENCRYPT=${ENVIRONMENT_HASH_ENCRYPT}
     ports:
       - "8081:8081"
+      - "8091:8091"
     networks:
       - hubly-network
     depends_on:
@@ -45,6 +46,7 @@ services:
         
     ports:
       - "8085:8085"
+      - "8095:8095"
     networks:
       - hubly-network
     depends_on:
@@ -72,6 +74,7 @@ services:
       - ENVIRONMENT_PULSE_HOST=${ENVIRONMENT_PULSE_HOST}
     ports:
       - "8082:8082"
+      - "8092:8092"
     networks:
       - hubly-network
     depends_on:
@@ -100,6 +103,7 @@ services:
       - ENVIRONMENT_WHATSAPP_SECRET=${ENVIRONMENT_WHATSAPP_SECRET}
     ports:
       - "8080:8080"
+      - "8090:8090"
     networks:
       - hubly-network
     depends_on:
