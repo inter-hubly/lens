@@ -1,6 +1,17 @@
 version: '3.8'
 
 services:
+    app:
+      build:
+        context: .
+        dockerfile: Dockerfile  # Certifique-se de que o Dockerfile está no mesmo diretório
+      ports:
+        - "80:80"  # Mapeia a porta 80 do container para a porta 80 do host
+      volumes:
+        - ./build:/usr/share/nginx/html  # Opcional: mapeia os arquivos build para facilitar o desenvolvimento
+      environment:
+        - NODE_ENV=production  # Defina variáveis de ambiente necessárias, como NODE_ENV
+  ---
   keeper:
     image: ghcr.io/inter-hubly/keeper:${ENVIRONMENT}
     container_name: keeper

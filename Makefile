@@ -2,7 +2,7 @@
 DOCKER_COMPOSE = docker-compose -f docker-compose.yml
 
 # Comandos
-.PHONY: up down clean keeper linker pulse webhook rabbitmq elasticsearch kibana postgres
+.PHONY: up down clean focus keeper linker pulse webhook rabbitmq elasticsearch kibana postgres all_build
 
 # Subir todos os serviços
 up:
@@ -36,6 +36,10 @@ webhook:
 	@$(DOCKER_COMPOSE) up -d webhook
 	@echo "Serviço 'webhook' foi iniciado."
 
+focus:
+	@$(DOCKER_COMPOSE) up -d focus
+	@echo "Serviço 'focus' foi iniciado."
+	
 rabbitmq:
 	@$(DOCKER_COMPOSE) up -d rabbitmq
 	@echo "Serviço 'rabbitmq' foi iniciado."
@@ -55,3 +59,18 @@ postgres:
 infra:
 	@$(DOCKER_COMPOSE) up -d rabbitmq elasticsearch kibana postgres
 	@echo "Infraestrutura (RabbitMQ, Elasticsearch, Kibana, Postgres) foi iniciada."
+
+# Subdiretórios a serem processados após voltar uma pasta
+SUBDIRS = keeper linker pulse webhook focus
+# Regra para encontrar o diretório pai e executar make build
+all_build:
+	@PARENT_DIR=$$(dirname $$(pwd)); \
+	for subdir in $(SUBDIRS); do \
+		TARGET_DIR=$$PARENT_DIR/$$subdir; \
+		if [ -d $$TARGET_DIR ]; then \
+			echo "Building in $$TARGET_DIR"; \
+			$(MAKE) -C $$TARGET_DIR build || exit 1; \
+		else \
+			echo "Directory $$TARGET_DIR not found! Skipping..."; \
+		fi; \
+	done
