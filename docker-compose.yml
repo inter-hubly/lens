@@ -1,17 +1,24 @@
 version: '3.8'
 
 services:
-    app:
-      build:
-        context: .
-        dockerfile: Dockerfile  # Certifique-se de que o Dockerfile está no mesmo diretório
-      ports:
-        - "80:80"  # Mapeia a porta 80 do container para a porta 80 do host
-      volumes:
-        - ./build:/usr/share/nginx/html  # Opcional: mapeia os arquivos build para facilitar o desenvolvimento
-      environment:
-        - NODE_ENV=production  # Defina variáveis de ambiente necessárias, como NODE_ENV
-  ---
+  focus:
+    image: ghcr.io/inter-hubly/focus:${ENVIRONMENT}
+    container_name: focus
+    environment:
+      - NODE_ENV=${ENVIRONMENT}
+      - REACT_APP_KEEPER_API_URL=${REACT_APP_KEEPER_API_URL}
+      - REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET=${REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET}
+    ports:
+      - "3000:80" 
+    networks:
+      - hubly-network
+    depends_on:
+      - linker
+      - elasticsearch
+      - postgres
+      - kibana
+      - rabbitmq
+      
   keeper:
     image: ghcr.io/inter-hubly/keeper:${ENVIRONMENT}
     container_name: keeper
@@ -54,7 +61,7 @@ services:
       - ENVIRONMENT_KEEPER_HOST=${ENVIRONMENT_KEEPER_HOST}
       - ENVIRONMENT_WEBHOOK_HOST=${ENVIRONMENT_WEBHOOK_HOST}
       - ENVIRONMENT_PULSE_HOST=${ENVIRONMENT_PULSE_HOST}
-        
+
     ports:
       - "8085:8085"
       - "8095:8095"
@@ -94,7 +101,7 @@ services:
       - kibana
       - rabbitmq
     restart: always
-    
+
   webhook:
     image: ghcr.io/inter-hubly/webhook:${ENVIRONMENT}
     container_name: webhook
@@ -123,7 +130,26 @@ services:
       - kibana
       - rabbitmq
     restart: always
-      
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml 
+    ports:
+      - "9090:9090" 
+    networks:
+      - hubly-network
+    depends_on:
+      - focus
+      - keeper
+      - linker
+      - pulse
+      - webhook
+      - rabbitmq
+      - elasticsearch
+      - kibana
+      - postgres
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq

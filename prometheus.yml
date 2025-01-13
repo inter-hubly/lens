@@ -1,0 +1,43 @@
+global:
+  scrape_interval: 15s 
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9090']
+
+  - job_name: 'focus'
+    static_configs:
+      - targets: ['focus:80'] 
+
+  - job_name: 'keeper'
+    static_configs:
+      - targets: ['keeper:8091'] 
+
+  - job_name: 'linker'
+    static_configs:
+      - targets: ['linker:8095']
+
+  - job_name: 'pulse'
+    static_configs:
+      - targets: ['pulse:8092']
+
+  - job_name: 'webhook'
+    static_configs:
+      - targets: ['webhook:8090']
+
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15672']  
+
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+        
+  - job_name: 'kibana'
+    static_configs:
+      - targets: ['kibana:5601']
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']  
