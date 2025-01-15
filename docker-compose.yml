@@ -9,7 +9,7 @@ services:
       - REACT_APP_KEEPER_API_URL=${REACT_APP_KEEPER_API_URL}
       - REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET=${REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET}
     ports:
-      - "3000:80" 
+      - "3011:80" 
     networks:
       - hubly-network
     depends_on:
@@ -150,21 +150,26 @@ services:
       - elasticsearch
       - kibana
       - postgres
+      
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
     ports:
       - "5671:5672"
       - "15671:15672"
+      - "15692:15692"
     networks:
       - hubly-network
     depends_on:
       - elasticsearch
       - kibana
-
+    command: >
+      sh -c "rabbitmq-plugins enable --offline rabbitmq_prometheus &&
+          rabbitmq-server"
+  
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
     container_name: elasticsearch
@@ -181,10 +186,19 @@ services:
       - esdata:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
-      - "9300:9300"
     networks:
       - hubly-network
 
+  elasticsearch_exporter:
+    image: justwatch/prometheus-elasticsearch-exporter
+    container_name: elasticsearch_exporter
+    environment:
+      - ES_URL=http://elasticsearch:9200
+    ports:
+      - "9114:9114"
+    networks:
+      - hubly-network
+        
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.2
     container_name: kibana
@@ -214,9 +228,42 @@ services:
     depends_on:
       - rabbitmq
 
+  postgres-exporter:
+    image: bitnami/postgres-exporter:latest
+    container_name: postgres-exporter
+    ports:
+      - "9187:9187" 
+    environment:
+      DATA_SOURCE_NAME: postgres://postgres:mypass@postgres:5432/hubly?sslmode=disable
+    depends_on:
+      - postgres
+    networks:
+      - hubly-network
+    
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_DATASOURCES_DEFAULT_NAME: prometheus
+      GF_DATASOURCES_DEFAULT_TYPE: prometheus
+      GF_DATASOURCES_DEFAULT_URL: http://prometheus:9090
+      GF_DATASOURCES_DEFAULT_ACCESS: proxy
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - hubly-network
+    depends_on:
+      - prometheus
+
 volumes:
   esdata:
   pgdata:
+  grafana_data:
 
 networks:
   hubly-network:
+    driver: bridge
