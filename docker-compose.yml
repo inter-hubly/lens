@@ -188,16 +188,6 @@ services:
       - "9200:9200"
     networks:
       - hubly-network
-
-  elasticsearch_exporter:
-    image: justwatch/prometheus-elasticsearch-exporter
-    container_name: elasticsearch_exporter
-    environment:
-      - ES_URL=http://elasticsearch:9200
-    ports:
-      - "9114:9114"
-    networks:
-      - hubly-network
         
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.2
