@@ -19,23 +19,23 @@ services:
       - hubly-network
     restart: always
 
-  linker:
-    image: ghcr.io/inter-hubly/linker:${ENVIRONMENT}
-    container_name: linker
-    environment:
-      - ENVIRONMENT_PORT=8085
-      - ENVIRONMENT=${ENVIRONMENT}
-      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
-      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
-      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
-      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
-      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
-      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
-    ports:
-      - "8085:8085"
-    networks:
-      - hubly-network
-    restart: always
+#  linker:
+#    image: ghcr.io/inter-hubly/linker:${ENVIRONMENT}
+#    container_name: linker
+#    environment:
+#      - ENVIRONMENT_PORT=8085
+#      - ENVIRONMENT=${ENVIRONMENT}
+#      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
+#      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
+#      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
+#      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
+#      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
+#      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
+#    ports:
+#      - "8085:8085"
+#    networks:
+#      - hubly-network
+#    restart: always
 
   pulse:
     image: ghcr.io/inter-hubly/pulse:${ENVIRONMENT}
