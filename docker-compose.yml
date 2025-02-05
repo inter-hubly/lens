@@ -9,7 +9,7 @@ services:
       - REACT_APP_KEEPER_API_URL=${REACT_APP_KEEPER_API_URL}
       - REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET=${REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET}
     ports:
-      - "3011:80" 
+      - "3011:80"
     networks:
       - hubly-network
     depends_on:
@@ -18,7 +18,7 @@ services:
       - postgres
       - kibana
       - rabbitmq
-      
+  
   keeper:
     image: ghcr.io/inter-hubly/keeper:${ENVIRONMENT}
     container_name: keeper
@@ -32,8 +32,9 @@ services:
       - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
       - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
       - ENVIRONMENT_HASH_ENCRYPT=${ENVIRONMENT_HASH_ENCRYPT}
-      - ENVIRONMENT_MONGO_HOST=${ENVIRONMENT_MONGO_HOST}
       - ENVIRONMENT_MONGO_DATABASE=${ENVIRONMENT_MONGO_DATABASE}
+      - ENVIRONMENT_MONGO_HOST=${ENVIRONMENT_MONGO_HOST}
+    
     ports:
       - "8081:8081"
       - "8091:8091"
@@ -63,8 +64,8 @@ services:
       - ENVIRONMENT_KEEPER_HOST=${ENVIRONMENT_KEEPER_HOST}
       - ENVIRONMENT_WEBHOOK_HOST=${ENVIRONMENT_WEBHOOK_HOST}
       - ENVIRONMENT_PULSE_HOST=${ENVIRONMENT_PULSE_HOST}
-      - ENVIRONMENT_MONGO_HOST=${ENVIRONMENT_MONGO_HOST}
       - ENVIRONMENT_MONGO_DATABASE=${ENVIRONMENT_MONGO_DATABASE}
+      - ENVIRONMENT_MONGO_HOST=${ENVIRONMENT_MONGO_HOST}
 
     ports:
       - "8085:8085"
@@ -94,8 +95,9 @@ services:
       - ENVIRONMENT_KEEPER_HOST=${ENVIRONMENT_KEEPER_HOST}
       - ENVIRONMENT_WEBHOOK_HOST=${ENVIRONMENT_WEBHOOK_HOST}
       - ENVIRONMENT_PULSE_HOST=${ENVIRONMENT_PULSE_HOST}
-      - ENVIRONMENT_MONGO_HOST=${ENVIRONMENT_MONGO_HOST}
       - ENVIRONMENT_MONGO_DATABASE=${ENVIRONMENT_MONGO_DATABASE}
+      - ENVIRONMENT_MONGO_HOST=${ENVIRONMENT_MONGO_HOST}
+    
     ports:
       - "8082:8082"
       - "8092:8092"
@@ -125,8 +127,9 @@ services:
       - ENVIRONMENT_WEBHOOK_HOST=${ENVIRONMENT_WEBHOOK_HOST}
       - ENVIRONMENT_PULSE_HOST=${ENVIRONMENT_PULSE_HOST}
       - ENVIRONMENT_WHATSAPP_SECRET=${ENVIRONMENT_WHATSAPP_SECRET}
-      - ENVIRONMENT_MONGO_HOST=${ENVIRONMENT_MONGO_HOST}
       - ENVIRONMENT_MONGO_DATABASE=${ENVIRONMENT_MONGO_DATABASE}
+      - ENVIRONMENT_MONGO_HOST=${ENVIRONMENT_MONGO_HOST}
+    
     ports:
       - "8080:8080"
       - "8090:8090"
@@ -143,9 +146,9 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml 
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
-      - "9090:9090" 
+      - "9090:9090"
     networks:
       - hubly-network
     depends_on:
@@ -158,7 +161,7 @@ services:
       - elasticsearch
       - kibana
       - postgres
-      
+  
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -196,7 +199,7 @@ services:
       - "9200:9200"
     networks:
       - hubly-network
-        
+  
   kibana:
     image: docker.elastic.co/kibana/kibana:8.10.2
     container_name: kibana
@@ -230,14 +233,14 @@ services:
     image: bitnami/postgres-exporter:latest
     container_name: postgres-exporter
     ports:
-      - "9187:9187" 
+      - "9187:9187"
     environment:
       DATA_SOURCE_NAME: postgres://postgres:mypass@postgres:5432/hubly?sslmode=disable
     depends_on:
       - postgres
     networks:
       - hubly-network
-    
+  
   grafana:
     image: grafana/grafana
     container_name: grafana
@@ -256,11 +259,43 @@ services:
       - hubly-network
     depends_on:
       - prometheus
+  
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27016:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - hubly-network
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      retries: 5
+  
+  mongodb-exporter:
+    image: bitnami/mongodb-exporter:latest
+    container_name: mongodb-exporter
+    environment:
+      MONGODB_URI: mongodb://mongodb:27016
+    ports:
+      - "9216:9216"
+    depends_on:
+      - mongodb
+    networks:
+      - hubly-network
+
 
 volumes:
   esdata:
   pgdata:
   grafana_data:
+  mongo_data:
 
 networks:
   hubly-network:
