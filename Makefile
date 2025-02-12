@@ -1,6 +1,6 @@
 # Variáveis
 DOCKER_COMPOSE = docker-compose
-SERVICES = keeper linker pulse webhook focus rabbitmq elasticsearch kibana postgres
+SERVICES = keeper linker pulse webhook focus rabbitmq elasticsearch kibana postgres sonarqube
 
 # Comandos principais
 .PHONY: up down clean infra only exclude build_all test $(SERVICES)
@@ -22,8 +22,8 @@ clean:
 
 # Subir a infraestrutura básica
 infra:
-	@$(DOCKER_COMPOSE) up -d rabbitmq elasticsearch kibana postgres
-	@echo "✅ Infraestrutura (RabbitMQ, Elasticsearch, Kibana, Postgres) foi iniciada."
+	@$(DOCKER_COMPOSE) up -d rabbitmq elasticsearch kibana postgres sonarqube
+	@echo "✅ Infraestrutura (RabbitMQ, Elasticsearch, Kibana, Postgres, sonarqube) foi iniciada."
 
 service:
 	@docker-compose -f docker-compose.services.yml up
