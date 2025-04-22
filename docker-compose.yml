@@ -1,23 +1,23 @@
 version: '3.8'
 
 services:
-  focus:
-    image: ghcr.io/inter-hubly/focus:${ENVIRONMENT}
-    container_name: focus
-    environment:
-      - NODE_ENV=${ENVIRONMENT}
-      - REACT_APP_KEEPER_API_URL=${REACT_APP_KEEPER_API_URL}
-      - REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET=${REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET}
-    ports:
-      - "3011:80"
-    networks:
-      - hubly-network
-    depends_on:
-      - linker
-      - elasticsearch
-      - postgres
-      - kibana
-      - rabbitmq
+#  focus:
+#    image: ghcr.io/inter-hubly/focus:${ENVIRONMENT}
+#    container_name: focus
+#    environment:
+#      - NODE_ENV=${ENVIRONMENT}
+#      - REACT_APP_KEEPER_API_URL=${REACT_APP_KEEPER_API_URL}
+#      - REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET=${REACT_APP_ENVIRONMENT_PULSE_WEBSOCKET}
+#    ports:
+#      - "3011:80"
+#    networks:
+#      - hubly-network
+#    depends_on:
+#      - linker
+#      - elasticsearch
+#      - postgres
+#      - kibana
+#      - rabbitmq
   
   keeper:
     image: ghcr.io/inter-hubly/keeper:${ENVIRONMENT}
@@ -152,7 +152,7 @@ services:
     networks:
       - hubly-network
     depends_on:
-      - focus
+#      - focus
       - keeper
       - linker
       - pulse

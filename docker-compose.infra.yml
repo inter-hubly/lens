@@ -1,17 +1,17 @@
 version: '3.8'
 # docker-compose -f docker-compose.infra.yml up -d
 services:
-#  rabbitmq:
-#    image: rabbitmq:3-management
-#    container_name: rabbitmq
-#    environment:
-#      - RABBITMQ_DEFAULT_USER=guest
-#      - RABBITMQ_DEFAULT_PASS=guest
-#    ports:
-#      - "5671:5672"
-#      - "15671:15672"
-#    networks:
-#      - hubly-network
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5671:5672"
+      - "15671:15672"
+    networks:
+      - hubly-network
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
@@ -45,20 +45,33 @@ services:
     depends_on:
       - elasticsearch
 
-#  postgres:
-#    image: postgres:15
-#    container_name: postgres
-#    environment:
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=mypass
-#      - POSTGRES_DB=hubly
-#    ports:
-#      - "5431:5432"
-#    volumes:
-#      - pgdata:/var/lib/postgresql/data
-#    networks:
-#      - hubly-network
-
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mypass
+      - POSTGRES_DB=hubly
+    ports:
+      - "5431:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - hubly-network
+  
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodbdata:/data/db
+    networks:
+      - hubly-network
+      
 volumes:
   esdata:
   pgdata:

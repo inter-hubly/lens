@@ -1,95 +1,67 @@
 version: '3.8'
-# docker-compose -f docker-compose.services.yml up -d
+
+x-common-env: &common-env
+  ENVIRONMENT: development
+  ENVIRONMENT_ELASTICSEARCH_HOST: http://localhost:9200
+  ENVIRONMENT_REDIS_HOST: localhost:6379
+  ENVIRONMENT_REDIS_DATABASE: 0
+  ENVIRONMENT_AMPQ_HOST: amqp://guest:guest@localhost:5672/
+  ENVIRONMENT_MONGO_HOST: mongodb://localhost:27017
+  ENVIRONMENT_MONGO_DATABASE: hubly
+
 services:
   keeper:
-    image: ghcr.io/inter-hubly/keeper:${ENVIRONMENT}
+    image: ghcr.io/inter-hubly/keeper:development
     container_name: keeper
     environment:
-      - ENVIRONMENT_PORT=8081
-      - ENVIRONMENT=${ENVIRONMENT}
-      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
-      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
-      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
-      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
-      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
-      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
-      - ENVIRONMENT_HASH_ENCRYPT=${ENVIRONMENT_HASH_ENCRYPT}
-    ports:
-      - "8081:8081"
-      - "8091:8091"
-    networks:
-      - hubly-network
+      <<: *common-env
+      ENVIRONMENT_PORT: 8081
+      ENVIRONMENT_PGSQL_HOST: postgres://postgres:frajolinha202@localhost:5432/hubly
+      ENVIRONMENT_HASH_ENCRYPT:
+    network_mode: "host"
     restart: always
 
   linker:
-    image: ghcr.io/inter-hubly/linker:${ENVIRONMENT}
+    image: ghcr.io/inter-hubly/linker:development
     container_name: linker
     environment:
-      - ENVIRONMENT_PORT=8085
-      - ENVIRONMENT=${ENVIRONMENT}
-      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
-      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
-      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
-      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
-      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
-      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
-      - ENVIRONMENT_LINKER_HOST=${ENVIRONMENT_LINKER_HOST}
-      - ENVIRONMENT_KEEPER_HOST=${ENVIRONMENT_KEEPER_HOST}
-      - ENVIRONMENT_WEBHOOK_HOST=${ENVIRONMENT_WEBHOOK_HOST}
-      - ENVIRONMENT_PULSE_HOST=${ENVIRONMENT_PULSE_HOST}
-    ports:
-      - "8085:8085"
-      - "8095:8095"
-    networks:
-      - hubly-network
+      <<: *common-env
+      ENVIRONMENT_PORT: 8085
+      ENVIRONMENT_PGSQL_HOST: postgres://postgres:frajolinha202@localhost:5432/hubly
+      ENVIRONMENT_LINKER_HOST: linker
+      ENVIRONMENT_KEEPER_HOST: keeper
+      ENVIRONMENT_WEBHOOK_HOST: webhook
+      ENVIRONMENT_PULSE_HOST: http://localhost:8082
+    network_mode: "host"
     restart: always
 
   pulse:
-    image: ghcr.io/inter-hubly/pulse:${ENVIRONMENT}
+    image: ghcr.io/inter-hubly/pulse:development
     container_name: pulse
     environment:
-      - ENVIRONMENT_PORT=8082
-      - ENVIRONMENT=${ENVIRONMENT}
-      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
-      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
-      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
-      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
-      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
-      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
-      - ENVIRONMENT_LINKER_HOST=${ENVIRONMENT_LINKER_HOST}
-      - ENVIRONMENT_KEEPER_HOST=${ENVIRONMENT_KEEPER_HOST}
-      - ENVIRONMENT_WEBHOOK_HOST=${ENVIRONMENT_WEBHOOK_HOST}
-      - ENVIRONMENT_PULSE_HOST=${ENVIRONMENT_PULSE_HOST}
-    ports:
-      - "8082:8082"
-      - "8092:8092"
-    networks:
-      - hubly-network
-
+      <<: *common-env
+      ENVIRONMENT_PORT: 8082
+      ENVIRONMENT_PGSQL_HOST: postgres://postgres:frajolinha202@localhost:5432/hubly
+      ENVIRONMENT_LINKER_HOST: linker
+      ENVIRONMENT_KEEPER_HOST: keeper
+      ENVIRONMENT_WEBHOOK_HOST: webhook
+      ENVIRONMENT_PULSE_HOST: http://localhost:8082
+    network_mode: "host"
     restart: always
 
   webhook:
-    image: ghcr.io/inter-hubly/webhook:${ENVIRONMENT}
+    image: ghcr.io/inter-hubly/webhook:development
     container_name: webhook
     environment:
-      - ENVIRONMENT_PORT=8080
-      - ENVIRONMENT=${ENVIRONMENT}
-      - ENVIRONMENT_APPID=${ENVIRONMENT_APPID}
-      - ENVIRONMENT_ELASTICSEARCH_HOST=${ENVIRONMENT_ELASTICSEARCH_HOST}
-      - ENVIRONMENT_REDIS_HOST=${ENVIRONMENT_REDIS_HOST}
-      - ENVIRONMENT_REDIS_DATABASE=${ENVIRONMENT_REDIS_DATABASE}
-      - ENVIRONMENT_AMPQ_HOST=${ENVIRONMENT_AMPQ_HOST}
-      - ENVIRONMENT_PGSQL_HOST=${ENVIRONMENT_PGSQL_HOST}
-      - ENVIRONMENT_LINKER_HOST=${ENVIRONMENT_LINKER_HOST}
-      - ENVIRONMENT_KEEPER_HOST=${ENVIRONMENT_KEEPER_HOST}
-      - ENVIRONMENT_WEBHOOK_HOST=${ENVIRONMENT_WEBHOOK_HOST}
-      - ENVIRONMENT_PULSE_HOST=${ENVIRONMENT_PULSE_HOST}
-      - ENVIRONMENT_WHATSAPP_SECRET=${ENVIRONMENT_WHATSAPP_SECRET}
-    ports:
-      - "8080:8080"
-      - "8090:8090"
-    networks:
-      - hubly-network
+      <<: *common-env
+      ENVIRONMENT_PORT: 8080
+      ENVIRONMENT_PGSQL_HOST: postgres://postgres:frajolinha202@localhost:5431/hubly
+      ENVIRONMENT_LINKER_HOST: linker
+      ENVIRONMENT_KEEPER_HOST: keeper
+      ENVIRONMENT_WEBHOOK_HOST: webhook
+      ENVIRONMENT_PULSE_HOST: http://localhost:8082
+      ENVIRONMENT_WHATSAPP_SECRET: hubly
+    network_mode: "host"
     restart: always
 
 networks:
