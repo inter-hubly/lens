@@ -10,6 +10,5 @@ Subir apenas a infra:
 `find . -type f \( -name "*.go" -o  -name "*.jsx" -o -name "*.tsx" \) -exec wc -l {} + | awk '{s+=$1} END {print s}'`
 
 `docker stop $(docker ps -q) && docker rm $(docker ps -aq)`
-O que devo mostrar:
-* Testes em /home/saimon/Documents/Hubly/keeper/internal/app/mediator/template_test.go
-* 
+
+`go generate ./...`
